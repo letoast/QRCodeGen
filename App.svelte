@@ -1,5 +1,5 @@
 <script>
-  import QRCode from "qrcode";
+  // import QRCode from "qrcode";
 
   let {
     znesek,
@@ -69,21 +69,21 @@
   //     }
   //   }
   // );
-  const handleSubmit = () => {};
-  // const handleSubmit = () => {
-  //   fetch("netlify/functions/qr-encode")
-  //     .then(response => {
-  //       console.log(response);
-  //       return response.json();
-  //     })
-  //     .then(data => {
-  //       console.log(data);
-  //     })
-  //     .catch(error => {
-  //       // console.error(error);
-  //       console.log("error: ", error);
-  //     });
-  // };
+  // const handleSubmit = () => {};
+  const handleSubmit = () => {
+    fetch("netlify/functions/qr-encode")
+      .then(response => {
+        console.log(response);
+        return response.json();
+      })
+      .then(data => {
+        console.log(data);
+      })
+      .catch(error => {
+        // console.error(error);
+        console.log("error: ", error);
+      });
+  };
 </script>
 
 <style>
