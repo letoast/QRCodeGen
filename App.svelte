@@ -36,7 +36,7 @@
 	let danes = new Date();
 	let internal;
 	let dateRef;
-	$: dateRefValue = dateRef ? dateRef.valueAsDate.toLocaleDateString().replaceAll('/', '.') : undefined;
+	$: dateRefValue = dateRef ? dateRef.valueAsDate : undefined;
 
 	const input = (x) => (internal = x.toISOString().substr(0, 10));
 	// const output = (x) => (date = dayjs(x, format).toDate())
@@ -49,6 +49,7 @@
 	let qrCode;
 	// const handleSubmit = () => {};
 	const handleSubmit = () => {
+		console.log(dateRefValue);
 		const result = encode({
 			slog: 'UPNQR',
 			polog: false,
