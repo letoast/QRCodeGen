@@ -36,7 +36,7 @@
 	let danes = new Date();
 	let internal;
 	let dateRef;
-	$: dateRefValue = dateRef ? dateRef.valueAsDate : undefined;
+	$: dateRefValue = dateRef ? dateRef.valueAsDate.toLocaleDateString().replaceAll('/', '.') : undefined;
 
 	const input = (x) => (internal = x.toISOString().substr(0, 10));
 	// const output = (x) => (date = dayjs(x, format).toDate())
@@ -149,6 +149,7 @@
 						<label for="rok-placila" class="label is-small">Rok plačila</label>
 						<div class="control">
 							<input bind:value={internal} name="rok-placila" type="date" class="input" bind:this={dateRef} />
+							{dateRefValue}
 						</div>
 					</div>
 
