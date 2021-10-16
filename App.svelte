@@ -36,7 +36,8 @@
 	let danes = new Date();
 	let internal;
 	let dateRef;
-	$: dateRefValue = dateRef ? dateRef.valueAsDate : undefined;
+	const getDateFromInput = (x) => (x ? x.valueAsDate : new Date());
+	$: getDateFromInput(dateRef);
 
 	const input = (x) => (internal = x.toISOString().substr(0, 10));
 	// const output = (x) => (date = dayjs(x, format).toDate())
@@ -49,7 +50,6 @@
 	let qrCode;
 	// const handleSubmit = () => {};
 	const handleSubmit = () => {
-		console.log(dateRefValue);
 		const result = encode({
 			slog: 'UPNQR',
 			polog: false,
@@ -61,7 +61,7 @@
 			nujno: true,
 			koda_namena,
 			namen_placila,
-			rok_placila: dateRefValue,
+			rok_placila: getDateFromInput(dateRef),
 			IBAN_prejemnika,
 			referenca_prejemnika,
 			ime_prejemnika,
