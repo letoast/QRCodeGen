@@ -1,0 +1,27 @@
+button,
+.btn,
+input,
+.form-control,
+.form-select {
+	@include font-size(1.25rem);
+	@include media-breakpoint-down(sm) {
+		@include font-size(1rem);
+	}
+}
+
+input[type='date'] {
+	display: block;
+	-webkit-appearance: textfield;
+	-moz-appearance: textfield;
+}
+
+.btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	svg {
+		width: 2rem;
+		height: auto;
+	}
+}

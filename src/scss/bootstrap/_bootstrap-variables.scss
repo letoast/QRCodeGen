@@ -1,0 +1,32 @@
+// colors
+$gray-100: #cfd8dc;
+$gray-200: #b0bec5;
+$gray-300: #90a4ae;
+$gray-400: #78909c;
+$gray-500: #607d8b;
+$gray-600: #546e7a;
+$gray-700: #455a64;
+$gray-800: #37474f;
+$gray-900: #263238;
+
+$primary: #063d83;
+
+// general
+$body-color: $gray-900;
+$border-radius: 0;
+$border-width: 2px;
+$font-family-sans-serif: 'Noto Sans Mono', 'Fira Sans', 'Helvetica Neue', 'Helvetica', sans-serif;
+$font-family-monospace: 'Noto Sans Mono', 'Fira Sans', 'Helvetica Neue', 'Helvetica', sans-serif;
+
+// buttons and inputs
+$input-btn-padding-y: 0.5rem;
+$input-btn-padding-x: 0.75rem;
+$btn-padding-y: 0.75rem;
+$btn-padding-x: 2.5rem;
+
+// forms
+$input-font-weight: 500;
+$form-label-font-size: 0.875rem;
+$form-label-margin-bottom: 0.25rem;
+$form-label-font-weight: 600;
+$input-placeholder-color: $gray-200;
