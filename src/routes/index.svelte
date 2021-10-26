@@ -1,3 +1,8 @@
+<script context="module">
+	export const ssr = false;
+	import Modal from 'sv-bootstrap-modal';
+</script>
+
 <script lang="ts">
 	import '$scss/app.scss';
 	import { onMount } from 'svelte';
@@ -10,10 +15,23 @@
 	import * as yup from 'yup';
 	import validator from 'validator';
 	import { posteSlovenija } from '$lib/posteSlovenija';
+	// import Modal from 'sv-bootstrap-modal';
+
+	// let Modal;
+	let isOpen = false;
 
 	// DATE OF PAYMENT
-	// const getDateFromInput = (x) => (x ? x.valueAsDate : new Date());
+	const formatDate = (date: Date): string => {
+		const [day, month, year] = date
+			.toLocaleString('sl-SI')
+			.replaceAll(' ', '')
+			.substr(0, 10)
+			.match(/\d+/g);
+		return `${year}-${month}-${day}`;
+	};
+
 	$: setDate = (e: Event) => {
+		console.log(new Date((<HTMLInputElement>e.target)?.value).toISOString());
 		$form.date = new Date((<HTMLInputElement>e.target)?.value);
 	};
 
@@ -22,44 +40,47 @@
 		.sort((a, b) => parseInt(a.postNumber) - parseInt(b.postNumber))
 		.map(({ postNumber, town }) => `${postNumber} ${town}`);
 
-	let qrCodeDataURL;
-
-	const { form, errors, state, isValid, handleChange, handleSubmit } = createForm({
+	const { form, errors, state, isValid, validateField, handleChange, handleSubmit } = createForm({
 		initialValues: {
-			ime_prejemnika: '',
-			ulica_prejemnika: '',
-			kraj_prejemnika: '',
-			IBAN_prejemnika: '',
+			ime_prejemnika: localStorage.getItem('ime_prejemnika') || '',
+			ulica_prejemnika: localStorage.getItem('ulica_prejemnika') || '',
+			kraj_prejemnika: localStorage.getItem('kraj_prejemnika') || '',
+			IBAN_prejemnika: localStorage.getItem('IBAN_prejemnika') || '',
 			referenca_prejemnika_part1: 'SI00',
 			referenca_prejemnika_part2: '',
 			koda_namena: 'OTHR',
-			namen_placila: 'NAKAŽI MI DENAR',
+			namen_placila: localStorage.getItem('namen_placila') || 'NAKAZI MI DENAR',
 			date: new Date(),
 			znesek: 10
 		},
 		validationSchema: yup.object().shape({
-			ime_prejemnika: yup.string().required('Ime in priimek je potrebno vpisati'),
-			ulica_prejemnika: yup.string().required('Ulico je potrebno vpisati'),
+			ime_prejemnika: yup.string().required('Ime in priimek je potrebno vnesti'),
+			ulica_prejemnika: yup.string().required('Ulico je potrebno vnesti'),
 			kraj_prejemnika: yup
 				.string()
 				.oneOf(postOfficeNumbers, 'Kraj prejemnika je potrebno izbrati')
 				.required(),
 			IBAN_prejemnika: yup
 				.string()
-				.test('Vpišite veljaven IBAN', (val) => validator.isIBAN(val))
+				.test('IBAN prejemnika', 'Vnesite veljaven IBAN', (val) => validator.isIBAN(val))
 				.required(),
 			referenca_prejemnika_part1: yup.string().oneOf(['SI00', 'SI99']).required(),
 			referenca_prejemnika_part2: yup.string().when('referenca_prejemnika_part1', {
 				is: 'SI00',
-				then: yup.string().required('Za SI00 je potrebna referenca')
+				then: yup.string().required('Za SI00 je potrebna referenca'),
+				otherwise: yup.string().nullable()
 			}),
 			koda_namena: yup.string().required(),
-			namen_placila: yup.string().required(),
+			namen_placila: yup.string().required('Namen plačila je potrebno vnesti'),
 			date: yup
 				.date()
 				.min(new Date(new Date().setHours(0, 0, 0, 0)))
 				.required(),
-			znesek: yup.number().required()
+			znesek: yup
+				.number()
+				.typeError('Znesek je potrebno vnesti')
+				.min(1, 'Najmanjši znesek je 1€')
+				.required()
 		}),
 		onSubmit: (values) => {
 			// alert(JSON.stringify(values));
@@ -68,45 +89,98 @@
 		}
 	});
 
-	// function handleSelect(e) {
-	// 	console.log(e);
-	// 	$form.kraj_prejemnika = e.detail?.value ? e.detail.value : '';
-	// }
-
-	const generateQR = async (data) => {
-		console.log(event);
-		const result = encode({
-			slog: 'UPNQR',
-			polog: false,
-			dvig: false,
-			ime_placnika: '',
-			ulica_placnika: '',
-			kraj_placnika: '',
-			znesek: data.znesek,
-			nujno: true,
-			koda_namena: data.koda_namena,
-			namen_placila: data.namen_placila,
-			rok_placila: new Date(data.date),
-			IBAN_prejemnika: data.IBAN_prejemnika,
-			referenca_prejemnika: `${data.referenca_prejemnika_part1}${
-				data.referenca_prejemnika_part2.length ? ` ${data.referenca_prejemnika_part2}` : ''
-			}`,
-			ime_prejemnika: data.ime_prejemnika,
-			ulica_prejemnika: data.ulica_prejemnika,
-			kraj_prejemnika: data.kraj_prejemnika,
-			rezerva: 'dodatek do skupaj 411 znakov'
-		});
-		const qr = qrcode(15, 'M');
-		qr.addData(result, 'Byte');
-		qr.make();
-		qrCodeDataURL = qr.createDataURL(4, 16);
-		const qrCodeFile = await dataURLToGIF(qrCodeDataURL, 'qrCode.gif');
-		await shareFile({ file: qrCodeFile, title: 'Nakaži mi', text: 'Moja QR koda za nakazilo' });
+	let qrCodeDataURL;
+	const generateQR = async ({
+		znesek,
+		koda_namena,
+		namen_placila,
+		date,
+		IBAN_prejemnika,
+		referenca_prejemnika_part1,
+		referenca_prejemnika_part2,
+		ime_prejemnika,
+		ulica_prejemnika,
+		kraj_prejemnika
+	}) => {
+		// console.log(event);
+		try {
+			const result = encode({
+				slog: 'UPNQR',
+				polog: false,
+				dvig: false,
+				ime_placnika: '',
+				ulica_placnika: '',
+				kraj_placnika: '',
+				znesek: znesek,
+				nujno: true,
+				koda_namena,
+				namen_placila,
+				rok_placila: new Date(date),
+				IBAN_prejemnika,
+				referenca_prejemnika: `${referenca_prejemnika_part1}${
+					referenca_prejemnika_part1 === 'SI00' ? ` ${referenca_prejemnika_part2}` : ''
+				}`,
+				ime_prejemnika,
+				ulica_prejemnika,
+				kraj_prejemnika,
+				rezerva: 'dodatek do skupaj 411 znakov'
+			});
+			const qr = qrcode(15, 'M');
+			qr.addData(result, 'Byte');
+			qr.make();
+			qrCodeDataURL = qr.createDataURL(4, 16);
+			isOpen = true;
+		} catch (error) {
+			console.log(error);
+		}
 	};
 
-	onMount(() => {
-		console.log($form.referenca_prejemnika_part1);
-	});
+	const shareQR = async () => {
+		const qrCodeFile = await dataURLToGIF(qrCodeDataURL, 'qrCode.GIF');
+		await shareFile({ file: qrCodeFile, title: 'Nakazi mi', text: 'Moja QR koda za nakazilo' });
+	};
+
+	const saveToLocalStorage = () => {
+		const storageObject = {
+			namen_placila: $form.namen_placila,
+			IBAN_prejemnika: $form.IBAN_prejemnika,
+			ime_prejemnika: $form.ime_prejemnika,
+			ulica_prejemnika: $form.ulica_prejemnika,
+			kraj_prejemnika: $form.kraj_prejemnika
+		};
+		for (const key in storageObject) {
+			localStorage.setItem(key, storageObject[key]);
+		}
+		hasLocalStorage = checkLocalStorage();
+	};
+
+	const deleteLocalStorage = () => {
+		localStorage.clear();
+		$form.namen_placila = '';
+		$form.IBAN_prejemnika = '';
+		$form.ime_prejemnika = '';
+		$form.ulica_prejemnika = '';
+		$form.kraj_prejemnika = '';
+		hasLocalStorage = checkLocalStorage();
+	};
+
+	const checkLocalStorage = () => {
+		const storageKeys = [
+			'namen_placila',
+			'IBAN_prejemnika',
+			'ime_prejemnika',
+			'ulica_prejemnika',
+			'kraj_prejemnika'
+		];
+		return !!storageKeys.map((key) => localStorage.getItem(key)).filter(Boolean).length;
+	};
+	let hasLocalStorage = checkLocalStorage();
+
+	// onMount(async () => {
+	// const module = await import('sv-bootstrap-modal');
+	// Modal = module;
+	// 	console.log($form.referenca_prejemnika_part1);
+	// });
 </script>
 
 <main>
@@ -143,9 +217,18 @@
 					<div>
 						<label for="street-address" class="form-label">Ulica</label>
 
-						<input
+						<InputMask
 							on:blur={handleChange}
 							bind:value={$form.ulica_prejemnika}
+							unmask="typed"
+							imask={{
+								mask: function (str) {
+									return /^[a-zčšžćđA-ZČŠŽĆĐ0-9\/\s]+$/.test(str);
+								},
+								prepare: function (str) {
+									return str.toUpperCase();
+								}
+							}}
 							placeholder="SLOVENSKA CESTA 1"
 							name="ulica_prejemnika"
 							autocomplete="street-address"
@@ -165,6 +248,7 @@
 							bind:value={$form.kraj_prejemnika}
 							name="kraj_prejemnika"
 							class="form-select"
+							id="form-select"
 							aria-label="Default select example"
 							placeholder="1000 Ljubljana"
 						>
@@ -182,14 +266,15 @@
 						<label for="iban" class="form-label">IBAN</label>
 						<InputMask
 							on:blur={handleChange}
-							on:change={handleChange}
+							on:keyup={handleChange}
+							on:customFocus={({ detail: { maskRef } }) => maskRef.updateOptions({ lazy: false })}
+							on:customBlur={({ detail: { maskRef } }) => maskRef.updateOptions({ lazy: true })}
 							bind:value={$form.IBAN_prejemnika}
 							name="IBAN_prejemnika"
 							inputmode="numeric"
 							unmask="typed"
 							imask={{
-								mask: 'SI56 0000 0000 0000 000',
-								overwrite: true
+								mask: 'SI56 0000 0000 0000 000'
 							}}
 							placeholder="SI56 0400 1004 7774 720"
 							class="form-control"
@@ -204,6 +289,7 @@
 						<div class="d-flex">
 							<select
 								bind:value={$form.referenca_prejemnika_part1}
+								on:change={() => validateField('referenca_prejemnika_part2')}
 								name="referenca_prejemnika_part1"
 								class="form-select w-auto me-2"
 								aria-label="Default select example"
@@ -221,7 +307,7 @@
 									pattern="[0-9]*"
 									unmask="typed"
 									imask={{ mask: /^\d+$/ }}
-									placeholder={new Date().toISOString().substr(0, 10).replace(/-/g, '')}
+									placeholder={new Date().toLocaleString().substr(0, 10).replace(/\//g, '')}
 									class="form-control"
 								/>
 							{/if}
@@ -251,10 +337,19 @@
 					<div>
 						<label for="namen" class="form-label">Namen plačila</label>
 
-						<input
+						<InputMask
 							on:blur={handleChange}
 							bind:value={$form.namen_placila}
-							placeholder="NAKAŽI MI DENAR"
+							unmask="typed"
+							imask={{
+								mask: function (str) {
+									return /^[a-zA-Z\s]+$/.test(str);
+								},
+								prepare: function (str) {
+									return str.toUpperCase();
+								}
+							}}
+							placeholder="NAKAZI MI DENAR"
 							name="namen_placila"
 							type="text"
 							class="form-control"
@@ -270,7 +365,8 @@
 						<input
 							on:blur={handleChange}
 							on:change={setDate}
-							value={new Date().toISOString().substr(0, 10)}
+							value={formatDate(new Date())}
+							min={formatDate(new Date())}
 							name="date"
 							type="date"
 							class="form-control"
@@ -283,9 +379,15 @@
 					<div>
 						<label for="znesek" class="form-label">Znesek v €</label>
 
-						<input
+						<InputMask
 							on:blur={handleChange}
+							on:keyup={handleChange}
 							bind:value={$form.znesek}
+							unmask="typed"
+							imask={{
+								mask: Number,
+								min: 1
+							}}
 							name="znesek"
 							placeholder="10"
 							type="number"
@@ -299,7 +401,7 @@
 					<button type="submit" class="btn btn-primary mt-3" disabled={!$isValid}>
 						<div class="d-flex justify-content-center align-items-center">
 							Zgeneriraj QR
-							<span class="material-icons-sharp ms-4"> qr_code_2 </span>
+							<span class="material-icons-sharp ms-2"> qr_code_2 </span>
 						</div>
 						<!-- <svg
 							class="ms-4"
@@ -326,14 +428,54 @@
 						</svg> -->
 					</button>
 				</form>
-			</div>
-		</div>
-		<div class="row justify-content-center">
-			<div class="col col-sm-auto">
-				<img src={qrCodeDataURL} alt="" />
+				{#if hasLocalStorage}
+					<button
+						type="button"
+						class="btn btn-outline-danger w-100 mt-3"
+						on:click={deleteLocalStorage}
+					>
+						<div class="d-flex justify-content-center align-items-center">
+							Izbriši lokalne podatke
+							<span class="material-icons-sharp ms-2"> delete </span>
+						</div>
+					</button>
+				{/if}
 			</div>
 		</div>
 	</section>
+	<Modal bind:open={isOpen}>
+		<div class="container px-4 pb-4">
+			<div class="row justify-content-center">
+				<div class="col col-sm-auto">
+					<img class="qr-code-image" src={qrCodeDataURL} alt="" />
+				</div>
+			</div>
+			<div class="row justify-content-center">
+				<div class="col">
+					<button type="button" class="btn btn-primary w-100 mt-3" on:click={shareQR}>
+						<div class="d-flex justify-content-center align-items-center">
+							Deli QR
+							<span class="material-icons-sharp ms-2"> ios_share </span>
+						</div>
+					</button>
+				</div>
+			</div>
+			<div class="row justify-content-center">
+				<div class="col">
+					<button
+						type="button"
+						class="btn btn-outline-primary w-100 mt-3"
+						on:click={saveToLocalStorage}
+					>
+						<div class="d-flex justify-content-center align-items-center">
+							Shrani podatke lokalno
+							<span class="material-icons-sharp ms-2"> favorite </span>
+						</div>
+					</button>
+				</div>
+			</div>
+		</div>
+	</Modal>
 </main>
 
 <style></style>

@@ -24,4 +24,18 @@ input[type='date'] {
 		width: 2rem;
 		height: auto;
 	}
+
+	&-primary {
+		&:hover {
+			color: $primary;
+			background: white;
+		}
+	}
+}
+
+form {
+	small {
+		color: #bc3635;
+		white-space: normal;
+	}
 }

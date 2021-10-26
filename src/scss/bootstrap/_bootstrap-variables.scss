@@ -22,7 +22,7 @@ $font-family-monospace: 'Noto Sans Mono', 'Fira Sans', 'Helvetica Neue', 'Helvet
 $input-btn-padding-y: 0.5rem;
 $input-btn-padding-x: 0.75rem;
 $btn-padding-y: 0.75rem;
-$btn-padding-x: 2.5rem;
+$btn-padding-x: 1rem;
 
 // forms
 $input-font-weight: 500;
@@ -30,3 +30,8 @@ $form-label-font-size: 0.875rem;
 $form-label-margin-bottom: 0.25rem;
 $form-label-font-weight: 600;
 $input-placeholder-color: $gray-200;
+
+// modal
+$modal-content-border-color: $gray-400;
+$modal-content-border-width: $border-width;
+$modal-content-border-radius: $border-radius;
