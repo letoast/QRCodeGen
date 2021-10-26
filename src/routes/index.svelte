@@ -36,9 +36,12 @@
 	};
 
 	// POST OFFICE
+	// const postOfficeNumbers = posteSlovenija
+	// 	.sort((a, b) => parseInt(a.postNumber) - parseInt(b.postNumber))
+	// 	.map(({ postNumber, town }) => `${postNumber} ${town}`);
 	const postOfficeNumbers = posteSlovenija
-		.sort((a, b) => parseInt(a.postNumber) - parseInt(b.postNumber))
-		.map(({ postNumber, town }) => `${postNumber} ${town}`);
+		.map(({ postNumber }) => parseInt(postNumber))
+		.sort((a, b) => a - b);
 
 	const { form, errors, state, isValid, validateField, handleChange, handleSubmit } = createForm({
 		initialValues: {
@@ -49,7 +52,7 @@
 			referenca_prejemnika_part1: 'SI00',
 			referenca_prejemnika_part2: '',
 			koda_namena: 'OTHR',
-			namen_placila: localStorage.getItem('namen_placila') || 'NAKAZI MI DENAR',
+			namen_placila: localStorage.getItem('namen_placila') || 'NAKAŽI MI DENAR',
 			date: new Date(),
 			znesek: 10
 		},
@@ -57,9 +60,15 @@
 			ime_prejemnika: yup.string().required('Ime in priimek je potrebno vnesti'),
 			ulica_prejemnika: yup.string().required('Ulico je potrebno vnesti'),
 			kraj_prejemnika: yup
-				.string()
-				.oneOf(postOfficeNumbers, 'Kraj prejemnika je potrebno izbrati')
-				.required(),
+				.number()
+				.oneOf(postOfficeNumbers, 'Vnesite obstoječo poštno številko')
+				.min(postOfficeNumbers[0], `Poštna številka je lahko najmanj ${postOfficeNumbers[0]}`)
+				.max(
+					postOfficeNumbers.slice(-1)[0],
+					`Poštna številka je lahko največ ${postOfficeNumbers.slice(-1)[0]}`
+				)
+				.truncate()
+				.required('Poštno številko je potrebno vnesti'),
 			IBAN_prejemnika: yup
 				.string()
 				.test('IBAN prejemnika', 'Vnesite veljaven IBAN', (val) => validator.isIBAN(val))
@@ -102,7 +111,13 @@
 		ulica_prejemnika,
 		kraj_prejemnika
 	}) => {
-		// console.log(event);
+		// console.log(
+		// 	`${kraj_prejemnika} ${convertAccentedCharacters(
+		// 		posteSlovenija
+		// 			.find(({ postNumber }) => parseInt(postNumber) === kraj_prejemnika)
+		// 			.town.toUpperCase()
+		// 	)}`
+		// );
 		try {
 			const result = encode({
 				slog: 'UPNQR',
@@ -114,15 +129,19 @@
 				znesek: znesek,
 				nujno: true,
 				koda_namena,
-				namen_placila: convertAccentedCharacters(namen_placila),
+				namen_placila,
 				rok_placila: new Date(date),
 				IBAN_prejemnika,
 				referenca_prejemnika: `${referenca_prejemnika_part1}${
 					referenca_prejemnika_part1 === 'SI00' ? ` ${referenca_prejemnika_part2}` : ''
 				}`,
-				ime_prejemnika: convertAccentedCharacters(ime_prejemnika),
-				ulica_prejemnika: convertAccentedCharacters(ulica_prejemnika),
-				kraj_prejemnika,
+				ime_prejemnika,
+				ulica_prejemnika,
+				kraj_prejemnika: `${kraj_prejemnika} ${convertAccentedCharacters(
+					posteSlovenija
+						.find(({ postNumber }) => parseInt(postNumber) === kraj_prejemnika)
+						.town.toUpperCase()
+				)}`,
 				rezerva: 'dodatek do skupaj 411 znakov'
 			});
 			const qr = qrcode(15, 'M');
@@ -187,7 +206,7 @@
 	<section class="container px-4 mb-5">
 		<div class="row justify-content-center mb-2">
 			<div class="col col-sm-8 col-md-7 col-lg-5 col-xxl-4 mt-5">
-				<h1>Naredi UPN QR kodo:</h1>
+				<h2 class="fw-bold">Naredi UPN QR kodo</h2>
 				<form on:submit|preventDefault={handleSubmit} class="d-grid gap-2 needs-validation">
 					<div>
 						<label for="ime_prejemnika" class="form-label">Ime in Priimek</label>
@@ -201,7 +220,7 @@
 									return /^[a-zčšžćđA-ZČŠŽĆĐ\s]+$/.test(str);
 								},
 								prepare: function (str) {
-									return str.toUpperCase();
+									return convertAccentedCharacters(str.toUpperCase());
 								}
 							}}
 							placeholder="JANEZ NOVAK"
@@ -227,7 +246,7 @@
 									return /^[a-zčšžćđA-ZČŠŽĆĐ0-9\/\s]+$/.test(str);
 								},
 								prepare: function (str) {
-									return str.toUpperCase();
+									return convertAccentedCharacters(str.toUpperCase());
 								}
 							}}
 							placeholder="SLOVENSKA CESTA 1"
@@ -242,8 +261,8 @@
 					</div>
 
 					<div>
-						<label for="kraj_prejemnika" class="form-label">Kraj</label>
-						<select
+						<label for="kraj_prejemnika" class="form-label">Poštna številka</label>
+						<!-- <select
 							on:blur={handleChange}
 							on:change={handleChange}
 							bind:value={$form.kraj_prejemnika}
@@ -257,7 +276,26 @@
 							{#each postOfficeNumbers as postOffice, index}
 								<option value={postOffice} selected={index === 0}>{postOffice}</option>
 							{/each}
-						</select>
+						</select> -->
+						<InputMask
+							on:blur={handleChange}
+							on:keyup={handleChange}
+							bind:value={$form.kraj_prejemnika}
+							name="kraj_prejemnika"
+							inputmode="numeric"
+							maxlength="4"
+							pattern="[0-9]*"
+							imask={{
+								mask: Number,
+								scale: 2,
+								signed: false,
+								max: postOfficeNumbers.slice(-1)[0]
+							}}
+							unmask="typed"
+							type="number"
+							placeholder="1000"
+							class="form-control"
+						/>
 						{#if $errors.kraj_prejemnika}
 							<small>{$errors.kraj_prejemnika}</small>
 						{/if}
@@ -343,9 +381,15 @@
 							bind:value={$form.namen_placila}
 							unmask="typed"
 							imask={{
+								mask: /^[[a-zčćđšžA-ZČĆĐŠŽ\s]+$/,
 								prepare: function (str) {
-									return str.toUpperCase();
+									return convertAccentedCharacters(str.toUpperCase());
 								}
+								// commit: function (value, masked) {
+								// 	// console.log(value);
+								// 	masked.value = convertAccentedCharacters(value);
+								// 	// return value;
+								// }
 							}}
 							placeholder="NAKAZI MI DENAR"
 							name="namen_placila"
