@@ -184,7 +184,7 @@
 </script>
 
 <main>
-	<section class="container px-4">
+	<section class="container px-4 mb-5">
 		<div class="row justify-content-center mb-2">
 			<div class="col col-sm-8 col-md-7 col-lg-5 col-xxl-4 mt-5">
 				<form on:submit|preventDefault={handleSubmit} class="d-grid gap-2 needs-validation">
@@ -444,7 +444,7 @@
 		</div>
 	</section>
 	<Modal bind:open={isOpen}>
-		<div class="container px-4 pb-4">
+		<div class="container pt-2 px-4 pb-4">
 			<div class="row justify-content-center">
 				<div class="col col-sm-auto">
 					<img class="qr-code-image" src={qrCodeDataURL} alt="" />
