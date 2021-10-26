@@ -5,7 +5,7 @@
 
 <script lang="ts">
 	import '$scss/app.scss';
-	import { onMount } from 'svelte';
+	// import { onMount } from 'svelte';
 	import { encode } from 'upnqr';
 	import qrcode from 'qrcode-generator';
 	import { shareFile } from '$lib/shareFile';
@@ -15,7 +15,7 @@
 	import * as yup from 'yup';
 	import validator from 'validator';
 	import { posteSlovenija } from '$lib/posteSlovenija';
-	// import Modal from 'sv-bootstrap-modal';
+	import { convertAccentedCharacters } from '$lib/convertAccentedCharacters';
 
 	// let Modal;
 	let isOpen = false;
@@ -114,14 +114,14 @@
 				znesek: znesek,
 				nujno: true,
 				koda_namena,
-				namen_placila,
+				namen_placila: convertAccentedCharacters(namen_placila),
 				rok_placila: new Date(date),
 				IBAN_prejemnika,
 				referenca_prejemnika: `${referenca_prejemnika_part1}${
 					referenca_prejemnika_part1 === 'SI00' ? ` ${referenca_prejemnika_part2}` : ''
 				}`,
-				ime_prejemnika,
-				ulica_prejemnika,
+				ime_prejemnika: convertAccentedCharacters(ime_prejemnika),
+				ulica_prejemnika: convertAccentedCharacters(ulica_prejemnika),
 				kraj_prejemnika,
 				rezerva: 'dodatek do skupaj 411 znakov'
 			});
@@ -187,6 +187,7 @@
 	<section class="container px-4 mb-5">
 		<div class="row justify-content-center mb-2">
 			<div class="col col-sm-8 col-md-7 col-lg-5 col-xxl-4 mt-5">
+				<h1>Naredi UPN QR kodo:</h1>
 				<form on:submit|preventDefault={handleSubmit} class="d-grid gap-2 needs-validation">
 					<div>
 						<label for="ime_prejemnika" class="form-label">Ime in Priimek</label>
