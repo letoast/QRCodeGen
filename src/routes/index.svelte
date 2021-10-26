@@ -343,9 +343,6 @@
 							bind:value={$form.namen_placila}
 							unmask="typed"
 							imask={{
-								mask: function (str) {
-									return /^[a-zA-Z\s]+$/.test(str);
-								},
 								prepare: function (str) {
 									return str.toUpperCase();
 								}
