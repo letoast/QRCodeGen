@@ -5,17 +5,20 @@
 
 <script lang="ts">
 	import '$scss/app.scss';
-	// import { onMount } from 'svelte';
-	import { encode } from 'upnqr';
-	import qrcode from 'qrcode-generator';
+	import { onMount } from 'svelte';
+	import { posteSlovenija } from '$lib/posteSlovenija';
+	import { convertAccentedCharacters } from '$lib/convertAccentedCharacters';
 	import { shareFile } from '$lib/shareFile';
 	import { dataURLToGIF } from '$lib/dataURLToGIF';
-	import InputMask from '$components/InputMask.svelte';
+
+	import { encode } from 'upnqr';
+	import qrcode from 'qrcode-generator';
 	import { createForm } from 'svelte-forms-lib';
 	import * as yup from 'yup';
 	import validator from 'validator';
-	import { posteSlovenija } from '$lib/posteSlovenija';
-	import { convertAccentedCharacters } from '$lib/convertAccentedCharacters';
+
+	import Select from 'svelte-select';
+	import InputMask from '$components/InputMask.svelte';
 
 	// let Modal;
 	let isOpen = false;
@@ -62,11 +65,6 @@
 			kraj_prejemnika: yup
 				.number()
 				.oneOf(postOfficeNumbers, 'Vnesite obstoječo poštno številko')
-				.min(postOfficeNumbers[0], `Poštna številka je lahko najmanj ${postOfficeNumbers[0]}`)
-				.max(
-					postOfficeNumbers.slice(-1)[0],
-					`Poštna številka je lahko največ ${postOfficeNumbers.slice(-1)[0]}`
-				)
 				.truncate()
 				.required('Poštno številko je potrebno vnesti'),
 			IBAN_prejemnika: yup
@@ -195,11 +193,19 @@
 	};
 	let hasLocalStorage = checkLocalStorage();
 
-	// onMount(async () => {
-	// const module = await import('sv-bootstrap-modal');
-	// Modal = module;
-	// 	console.log($form.referenca_prejemnika_part1);
-	// });
+	let selectInputRef;
+
+	const testFunc = (e) => {
+		console.log(e);
+	};
+
+	onMount(async () => {
+		<HTMLElement>selectInputRef.addEventListener('blur', handleChange);
+		<HTMLElement>selectInputRef.addEventListener('keyup', handleChange);
+		// const module = await import('sv-bootstrap-modal');
+		// Modal = module;
+		// 	console.log($form.referenca_prejemnika_part1);
+	});
 </script>
 
 <main>
@@ -277,7 +283,23 @@
 								<option value={postOffice} selected={index === 0}>{postOffice}</option>
 							{/each}
 						</select> -->
-						<InputMask
+
+						<Select
+							bind:value={$form.kraj_prejemnika}
+							bind:input={selectInputRef}
+							items={postOfficeNumbers}
+							inputAttributes={{
+								name: 'kraj_prejemnika',
+								id: 'kraj_prejemnika',
+								inputmode: 'numeric',
+								pattern: '[0-9]*',
+								type: 'number',
+								maxlength: '4',
+								class: 'form-control'
+							}}
+							containerStyles={'display: inherit; height: auto'}
+						/>
+						<!-- <InputMask
 							on:blur={handleChange}
 							on:keyup={handleChange}
 							bind:value={$form.kraj_prejemnika}
@@ -295,7 +317,7 @@
 							type="number"
 							placeholder="1000"
 							class="form-control"
-						/>
+						/> -->
 						{#if $errors.kraj_prejemnika}
 							<small>{$errors.kraj_prejemnika}</small>
 						{/if}

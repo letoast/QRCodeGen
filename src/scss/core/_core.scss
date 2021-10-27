@@ -42,16 +42,22 @@ input[type=number] {
 	--borderRadius: 0;
 	--listBorderRadius: 0;
 	--itemFirstBorderRadius: 0;
-	--border: #{$border-width} solid #{$gray-400};
-	--borderFocusColor: #{$gray-400};
-	--padding: 0.5rem 0.75rem;
+	--border: none;
+	--borderFocusColor: none;
+	--padding: 0;
 	--clearSelectTop: 0;
 	--clearSelectBottom: 0;
 	--height: 2.75rem;
-	--itemIsActiveBG: #{$primary};
+	--itemIsActiveBG: transparent;
+}
 
-	&.focused {
-		box-shadow: 0 0 0 0.25rem rgb(6 61 131 / 25%);
+#kraj_prejemnika {
+	@extend .form-control;
+	height: auto;
+	position: initial;
+
+	&:active {
+		border: none;
 	}
 }
 
