@@ -9,14 +9,15 @@ $gray-700: #455a64;
 $gray-800: #37474f;
 $gray-900: #263238;
 
-$primary: #063d83;
+$primary: #2a2829;
+$danger: #d8705c;
 
 // general
 $body-color: $gray-900;
-$border-radius: 0.5rem;
+$border-radius: 0;
 $border-width: 1px;
-$font-family-sans-serif: 'Noto Sans Mono', 'Fira Sans', 'Helvetica Neue', 'Helvetica', sans-serif;
-$font-family-monospace: 'Noto Sans Mono', 'Fira Sans', 'Helvetica Neue', 'Helvetica', sans-serif;
+$font-family-sans-serif: 'JetBrains Mono', 'Fira Sans', 'Helvetica Neue', 'Helvetica', sans-serif;
+$font-family-monospace: 'JetBrains Mono', 'Fira Sans', 'Helvetica Neue', 'Helvetica', sans-serif;
 
 // buttons and inputs
 $input-btn-padding-y: 0.5rem;

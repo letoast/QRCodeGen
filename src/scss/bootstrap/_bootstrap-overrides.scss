@@ -9,6 +9,11 @@ input,
 	}
 }
 
+.form-control[readonly] {
+	background-color: #e8eef1;
+	color: $gray-500;
+}
+
 input[type='date'] {
 	display: block;
 	-webkit-appearance: textfield;
