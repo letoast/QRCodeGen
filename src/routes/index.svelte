@@ -68,7 +68,7 @@
 				.required('Poštno številko je potrebno vnesti'),
 			IBAN_prejemnika: yup
 				.string()
-				.test('IBAN prejemnika', 'Vnesite veljaven IBAN', (val) => validator.isIBAN(val))
+				.test('TRR prejemnika', 'Vnesite veljaven TRR', (val) => validator.isIBAN(val))
 				.required(),
 			referenca_prejemnika_part1: yup.string().oneOf(['SI00', 'SI99']).required(),
 			referenca_prejemnika_part2: yup.string().when('referenca_prejemnika_part1', {
@@ -190,8 +190,7 @@
 	};
 	let hasLocalStorage = checkLocalStorage();
 
-	let selectInputRef;
-	let selectValue = localStorage.getItem('kraj_prejemnika') || '';
+	let selectInputRef, selectValue;
 
 	const handleSelectChange = (type: string) => {
 		if (selectInputRef) {
@@ -215,13 +214,13 @@
 </script>
 
 <main>
-	<section class="container px-4 mb-5">
-		<div class="row justify-content-center mb-2">
-			<div class="col col-sm-8 col-md-7 col-lg-5 col-xxl-4 mt-5">
-				<h2 class="fw-bold">Naredi UPN QR kodo</h2>
-				<form on:submit|preventDefault={handleSubmit} class="d-grid gap-2 needs-validation">
+	<section class="container px-3 my-4">
+		<div class="row justify-content-center">
+			<div class="col col-sm-8 col-md-7 col-lg-5 col-xxl-4">
+				<h2 class="fw-bold mb-4">Naredi UPN QR kodo</h2>
+				<form on:submit|preventDefault={handleSubmit} class="d-grid gap-3 needs-validation">
 					<div>
-						<label for="ime_prejemnika" class="form-label">Ime in Priimek</label>
+						<label for="ime_prejemnika" class="form-label">📇 Ime in Priimek</label>
 
 						<InputMask
 							on:blur={handleChange}
@@ -247,7 +246,7 @@
 					</div>
 
 					<div>
-						<label for="street-address" class="form-label">Ulica</label>
+						<label for="street-address" class="form-label">🗺️ Ulica</label>
 
 						<InputMask
 							on:blur={handleChange}
@@ -273,17 +272,21 @@
 					</div>
 
 					<div>
-						<label for="kraj_prejemnika" class="form-label">Poštna številka</label>
+						<label for="kraj_prejemnika" class="form-label">🏤 Poštna številka</label>
 						<Autocomplete
 							bind:value={selectValue}
 							onBlur={() => handleSelectChange('blur')}
 							onChange={() => handleSelectChange('change')}
 							onFocus={() => handleSelectChange('focus')}
 							items={postOfficeNumbers}
+							selectedItem={postOfficeNumbers.find(
+								(item) => item === localStorage.getItem('kraj_prejemnika')
+							) || ''}
 							hideArrow={true}
 							showClear={!!$form.kraj_prejemnika}
 							name="kraj_prejemnika"
 							placeholder="1000"
+							noResultsText="Ni rezultatov 😥"
 							inputClassName="form-control"
 							inputId="kraj_prejemnika"
 						/>
@@ -293,7 +296,7 @@
 					</div>
 
 					<div>
-						<label for="iban" class="form-label">IBAN</label>
+						<label for="iban" class="form-label">🏦 TRR</label>
 						<InputMask
 							on:blur={handleChange}
 							on:keyup={handleChange}
@@ -395,7 +398,7 @@
 					</div>
 
 					<div>
-						<label for="rok-placila" class="form-label">Rok plačila</label>
+						<label for="rok-placila" class="form-label">📅 Rok plačila</label>
 
 						<input
 							on:blur={handleChange}
@@ -412,7 +415,7 @@
 					</div>
 
 					<div>
-						<label for="znesek" class="form-label">Znesek v €</label>
+						<label for="znesek" class="form-label">💵 Znesek v €</label>
 
 						<InputMask
 							on:blur={handleChange}
@@ -434,33 +437,7 @@
 					</div>
 
 					<button type="submit" class="btn btn-primary mt-3" disabled={!$isValid}>
-						<div class="d-flex justify-content-center align-items-center">
-							Zgeneriraj QR
-							<span class="material-icons-sharp ms-2"> qr_code_2 </span>
-						</div>
-						<!-- <svg
-							class="ms-4"
-							version="1.1"
-							xmlns="http://www.w3.org/2000/svg"
-							xmlns:xlink="http://www.w3.org/1999/xlink"
-							viewBox="0 0 50 50"
-							xml:space="preserve"
-						>
-							<path
-								fill="currentColor"
-								d="M43.935,25.145c0-10.318-8.364-18.683-18.683-18.683c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615c8.072,0,14.615,6.543,14.615,14.615H43.935z"
-							>
-								<animateTransform
-									attributeType="xml"
-									attributeName="transform"
-									type="rotate"
-									from="0 25 25"
-									to="360 25 25"
-									dur="0.6s"
-									repeatCount="indefinite"
-								/>
-							</path>
-						</svg> -->
+						<div class="d-flex justify-content-center align-items-center">Zgeneriraj QR 🚀</div>
 					</button>
 				</form>
 				{#if hasLocalStorage}
@@ -470,8 +447,7 @@
 						on:click={deleteLocalStorage}
 					>
 						<div class="d-flex justify-content-center align-items-center">
-							Izbriši lokalne podatke
-							<span class="material-icons-sharp ms-2"> delete </span>
+							Izbriši lokalne podatke 🗑️
 						</div>
 					</button>
 				{/if}
@@ -488,10 +464,7 @@
 			<div class="row justify-content-center">
 				<div class="col">
 					<button type="button" class="btn btn-primary w-100 mt-3" on:click={shareQR}>
-						<div class="d-flex justify-content-center align-items-center">
-							Deli QR
-							<span class="material-icons-sharp ms-2"> ios_share </span>
-						</div>
+						<div class="d-flex justify-content-center align-items-center">Deli QR 💸</div>
 					</button>
 				</div>
 			</div>
@@ -503,8 +476,7 @@
 						on:click={saveToLocalStorage}
 					>
 						<div class="d-flex justify-content-center align-items-center">
-							Shrani podatke lokalno
-							<span class="material-icons-sharp ms-2"> favorite </span>
+							Shrani podatke lokalno 💾
 						</div>
 					</button>
 				</div>
