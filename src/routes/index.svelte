@@ -17,7 +17,7 @@
 	import * as yup from 'yup';
 	import validator from 'validator';
 
-	import Select from 'svelte-select';
+	import Autocomplete from 'simple-svelte-autocomplete';
 	import InputMask from '$components/InputMask.svelte';
 
 	// let Modal;
@@ -34,7 +34,7 @@
 	};
 
 	$: setDate = (e: Event) => {
-		console.log(new Date((<HTMLInputElement>e.target)?.value).toISOString());
+		// console.log(new Date((<HTMLInputElement>e.target)?.value).toISOString());
 		$form.date = new Date((<HTMLInputElement>e.target)?.value);
 	};
 
@@ -43,8 +43,8 @@
 	// 	.sort((a, b) => parseInt(a.postNumber) - parseInt(b.postNumber))
 	// 	.map(({ postNumber, town }) => `${postNumber} ${town}`);
 	const postOfficeNumbers = posteSlovenija
-		.map(({ postNumber }) => parseInt(postNumber))
-		.sort((a, b) => a - b);
+		.sort((a, b) => parseInt(a.postNumber) - parseInt(b.postNumber))
+		.map(({ postNumber }) => postNumber);
 
 	const { form, errors, state, isValid, validateField, handleChange, handleSubmit } = createForm({
 		initialValues: {
@@ -63,9 +63,8 @@
 			ime_prejemnika: yup.string().required('Ime in priimek je potrebno vnesti'),
 			ulica_prejemnika: yup.string().required('Ulico je potrebno vnesti'),
 			kraj_prejemnika: yup
-				.number()
+				.string()
 				.oneOf(postOfficeNumbers, 'Vnesite obstoječo poštno številko')
-				.truncate()
 				.required('Poštno številko je potrebno vnesti'),
 			IBAN_prejemnika: yup
 				.string()
@@ -136,9 +135,7 @@
 				ime_prejemnika,
 				ulica_prejemnika,
 				kraj_prejemnika: `${kraj_prejemnika} ${convertAccentedCharacters(
-					posteSlovenija
-						.find(({ postNumber }) => parseInt(postNumber) === kraj_prejemnika)
-						.town.toUpperCase()
+					posteSlovenija.find(({ postNumber }) => postNumber === kraj_prejemnika).town.toUpperCase()
 				)}`,
 				rezerva: 'dodatek do skupaj 411 znakov'
 			});
@@ -194,17 +191,26 @@
 	let hasLocalStorage = checkLocalStorage();
 
 	let selectInputRef;
+	let selectValue = localStorage.getItem('kraj_prejemnika') || '';
 
-	const testFunc = (e) => {
-		console.log(e);
+	const handleSelectChange = (type: string) => {
+		if (selectInputRef) {
+			if (type === 'change') {
+				selectInputRef.value = selectValue;
+				$form.kraj_prejemnika = selectValue;
+			} else if (type === 'blur') {
+				$form.kraj_prejemnika = selectInputRef.value;
+			}
+			// @ts-ignore
+			handleChange({ target: selectInputRef });
+		}
 	};
 
 	onMount(async () => {
-		<HTMLElement>selectInputRef.addEventListener('blur', handleChange);
-		<HTMLElement>selectInputRef.addEventListener('keyup', handleChange);
-		// const module = await import('sv-bootstrap-modal');
-		// Modal = module;
-		// 	console.log($form.referenca_prejemnika_part1);
+		selectInputRef = document.querySelector('input[name="kraj_prejemnika"]');
+		selectInputRef.inputMode = 'numeric';
+		selectInputRef.pattern = '[0-9]*';
+		selectInputRef.maxLength = '4';
 	});
 </script>
 
@@ -249,7 +255,7 @@
 							unmask="typed"
 							imask={{
 								mask: function (str) {
-									return /^[a-zčšžćđA-ZČŠŽĆĐ0-9\/\s]+$/.test(str);
+									return /^[a-zčšžćđA-ZČŠŽĆĐ][a-zčšžćđA-ZČŠŽĆĐ0-9\/\s]*$/.test(str);
 								},
 								prepare: function (str) {
 									return convertAccentedCharacters(str.toUpperCase());
@@ -268,56 +274,19 @@
 
 					<div>
 						<label for="kraj_prejemnika" class="form-label">Poštna številka</label>
-						<!-- <select
-							on:blur={handleChange}
-							on:change={handleChange}
-							bind:value={$form.kraj_prejemnika}
-							name="kraj_prejemnika"
-							class="form-select"
-							id="form-select"
-							aria-label="Default select example"
-							placeholder="1000 Ljubljana"
-						>
-							<option value="" disabled selected hidden>IZBERI KRAJ</option>
-							{#each postOfficeNumbers as postOffice, index}
-								<option value={postOffice} selected={index === 0}>{postOffice}</option>
-							{/each}
-						</select> -->
-
-						<Select
-							bind:value={$form.kraj_prejemnika}
-							bind:input={selectInputRef}
+						<Autocomplete
+							bind:value={selectValue}
+							onBlur={() => handleSelectChange('blur')}
+							onChange={() => handleSelectChange('change')}
+							onFocus={() => handleSelectChange('focus')}
 							items={postOfficeNumbers}
-							inputAttributes={{
-								name: 'kraj_prejemnika',
-								id: 'kraj_prejemnika',
-								inputmode: 'numeric',
-								pattern: '[0-9]*',
-								type: 'number',
-								maxlength: '4',
-								class: 'form-control'
-							}}
-							containerStyles={'display: inherit; height: auto'}
-						/>
-						<!-- <InputMask
-							on:blur={handleChange}
-							on:keyup={handleChange}
-							bind:value={$form.kraj_prejemnika}
+							hideArrow={true}
+							showClear={!!$form.kraj_prejemnika}
 							name="kraj_prejemnika"
-							inputmode="numeric"
-							maxlength="4"
-							pattern="[0-9]*"
-							imask={{
-								mask: Number,
-								scale: 2,
-								signed: false,
-								max: postOfficeNumbers.slice(-1)[0]
-							}}
-							unmask="typed"
-							type="number"
 							placeholder="1000"
-							class="form-control"
-						/> -->
+							inputClassName="form-control"
+							inputId="kraj_prejemnika"
+						/>
 						{#if $errors.kraj_prejemnika}
 							<small>{$errors.kraj_prejemnika}</small>
 						{/if}
@@ -330,6 +299,8 @@
 							on:keyup={handleChange}
 							on:customFocus={({ detail: { maskRef } }) => maskRef.updateOptions({ lazy: false })}
 							on:customBlur={({ detail: { maskRef } }) => maskRef.updateOptions({ lazy: true })}
+							on:paste={(e) =>
+								($form.IBAN_prejemnika = e.clipboardData.getData('text').replace('SI56', ''))}
 							bind:value={$form.IBAN_prejemnika}
 							name="IBAN_prejemnika"
 							inputmode="numeric"
@@ -337,7 +308,7 @@
 							imask={{
 								mask: 'SI56 0000 0000 0000 000'
 							}}
-							placeholder="SI56 0400 1004 7774 720"
+							placeholder="SI56 1920 0123 4567 892"
 							class="form-control"
 						/>
 						{#if $errors.IBAN_prejemnika}

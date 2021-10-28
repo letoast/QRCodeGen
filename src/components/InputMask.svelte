@@ -69,6 +69,7 @@
 	on:complete
 	on:blur
 	on:keyup
+	on:paste
 	on:focus={dispatch('customFocus', { maskRef })}
 	on:blur={dispatch('customBlur', { maskRef })}
 />
