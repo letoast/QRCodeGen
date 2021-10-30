@@ -89,7 +89,7 @@
 				.required()
 		}),
 		onSubmit: (values) => {
-			alert(JSON.stringify(values));
+			// alert(JSON.stringify(values));
 			// console.log(new Date(values.date));
 			generateQR(values);
 		}
