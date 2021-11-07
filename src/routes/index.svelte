@@ -11,7 +11,7 @@
 </script>
 
 <main>
-	<section class="container px-3 my-4">
+	<section class="container px-3 pt-8 pb-9">
 		<div class="row justify-content-center">
 			<div class="col col-sm-8 mb-4">
 				<h2 class="text-center mb-4">💸 nakazi.cash 💸</h2>
@@ -47,5 +47,18 @@
 	</section>
 	<ShareModal />
 </main>
+<footer class="container-fluid bg-dark text-light py-3">
+	<div class="row">
+		<div class="col text-center">
+			Made with 😕 by IG: <a
+				class="text-light"
+				href="https://www.instagram.com/ciril.tr/"
+				target="_blank">Ciril</a
+			>
+			/ github:
+			<a class="text-light" href="https://github.com/letoast" target="_blank">letoast</a>
+		</div>
+	</div>
+</footer>
 
 <style></style>

@@ -4,7 +4,17 @@
 </script>
 
 <script lang="ts">
-	import { saveToLocalStorage, shareQR, qrCodeDataURL, isOpen } from '$stores/createForm';
+	import {
+		saveToLocalStorage,
+		shareQR,
+		qrCodeDataURL,
+		isOpen,
+		filesSaved
+	} from '$stores/createForm';
+
+	$: if ($isOpen === false) {
+		filesSaved.set(false);
+	}
 </script>
 
 <Modal bind:open={$isOpen}>
@@ -23,15 +33,21 @@
 		</div>
 		<div class="row justify-content-center">
 			<div class="col">
-				<button
-					type="button"
-					class="btn btn-outline-primary w-100 mt-3"
-					on:click={saveToLocalStorage}
-				>
-					<div class="d-flex justify-content-center align-items-center">
-						Shrani vnešene podatke 💾
-					</div>
-				</button>
+				{#if $filesSaved}
+					<button type="button" class="btn btn-secondary w-100 mt-3" disabled>
+						<div class="d-flex justify-content-center align-items-center">Podatki Shranjeni!</div>
+					</button>
+				{:else}
+					<button
+						type="button"
+						class="btn btn-outline-secondary w-100 mt-3"
+						on:click={saveToLocalStorage}
+					>
+						<div class="d-flex justify-content-center align-items-center">
+							Shrani vnešene podatke 💾
+						</div>
+					</button>
+				{/if}
 			</div>
 		</div>
 	</div>

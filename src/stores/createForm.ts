@@ -82,6 +82,8 @@ export const shareQR = async (): Promise<void> => {
 	}
 };
 
+export const filesSaved = writable(false);
+
 export const saveToLocalStorage = (): void => {
 	const currentForm = get(form);
 	const storageObject = {
@@ -93,6 +95,7 @@ export const saveToLocalStorage = (): void => {
 	};
 	localStorage.setItem('userPresets', JSON.stringify(storageObject));
 	hasLocalStorage.set(checkLocalStorage());
+	filesSaved.set(true);
 };
 
 export const deleteLocalStorage = (): void => {
