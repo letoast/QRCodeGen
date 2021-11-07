@@ -11,7 +11,7 @@
 </script>
 
 <main>
-	<section class="container px-3 pt-8 pb-9">
+	<section class="container px-3 pt-6 pt-md-8 pb-9">
 		<div class="row justify-content-center">
 			<div class="col col-sm-8 mb-4">
 				<h2 class="text-center mb-4">💸 nakazi.cash 💸</h2>
