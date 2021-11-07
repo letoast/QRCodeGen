@@ -5,7 +5,7 @@ import { createForm } from 'svelte-forms-lib';
 import validator from 'validator';
 import { encode } from 'upnqr';
 import qrcode from 'qrcode-generator';
-import { shareFile } from '$lib/shareFile';
+import { shareFile, downloadFile } from '$lib/shareFile';
 import { dataURLToGIF } from '$lib/dataURLToGIF';
 import { convertAccentedCharacters } from '$lib/convertAccentedCharacters';
 
@@ -73,8 +73,13 @@ const generateQR = async ({
 };
 
 export const shareQR = async (): Promise<void> => {
-	const qrCodeFile = await dataURLToGIF(get(qrCodeDataURL), 'qrCode.GIF');
-	await shareFile({ file: qrCodeFile, title: 'Nakazi mi', text: 'Moja QR koda za nakazilo' });
+	const qrCodeFile = await dataURLToGIF(get(qrCodeDataURL), 'qrCode.gif');
+	try {
+		await shareFile({ file: qrCodeFile, title: 'Nakazi mi', text: 'Moja QR koda za nakazilo' });
+	} catch (error) {
+		console.log('Sharing failed', error);
+		downloadFile(get(qrCodeDataURL), 'qrCode.gif');
+	}
 };
 
 export const saveToLocalStorage = (): void => {
