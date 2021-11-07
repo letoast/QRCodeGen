@@ -20,10 +20,11 @@ const config = {
 			resolve: {
 				alias: {
 					$scss: path.resolve('./src/scss'),
-					$components: path.resolve('./src/components')
+					$components: path.resolve('./src/components'),
+					$stores: path.resolve('./src/stores')
 				}
 			}
-		}
+		},
 	}
 };
 

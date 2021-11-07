@@ -1,6 +1,9 @@
 {
-  "name": "qrcodegen",
-  "version": "0.0.1",
+  "name": "nakazi.cash",
+  "version": "1.0.0",
+  "author": {
+    "name": "letoast"
+  },
   "scripts": {
     "dev": "svelte-kit dev --host",
     "build": "svelte-kit build",
@@ -35,7 +38,7 @@
     "bootstrap": "^5.1.3",
     "qrcode-generator": "^1.4.4",
     "sass": "^1.43.2",
-    "svelte-forms-lib": "^1.10.7",
+    "svelte-forms-lib": "^1.10.10",
     "upnqr": "^1.1.0",
     "validator": "^13.6.0",
     "yup": "^0.32.11"
