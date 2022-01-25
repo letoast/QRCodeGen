@@ -13,18 +13,14 @@
 		on:customFocus={({ detail: { maskRef } }) => maskRef.updateOptions({ lazy: false })}
 		on:customBlur={({ detail: { maskRef } }) => maskRef.updateOptions({ lazy: true })}
 		on:paste={(e) => {
-			// console.log(
-			// 	e.clipboardData.getData('text').replace('SI56', '').replace('si56', '')
-			// );
-			$form.IBAN_prejemnika = e.clipboardData
-				.getData('text')
+			// console.log(`${e.clipboardData.getData('text')}`.replace('SI56', '').replace('si56', ''));
+			$form.IBAN_prejemnika = `${e.clipboardData.getData('text')}`
 				.replace('SI56', '')
 				.replace('si56', '');
 		}}
 		bind:value={$form.IBAN_prejemnika}
 		name="IBAN_prejemnika"
 		inputmode="numeric"
-		unmask="masked"
 		imask={{
 			mask: '{SI56} 0000 0000 0000 000',
 			commit: (value, mask) => {
