@@ -8,6 +8,8 @@
 
 	import SubmitForm from '$components/index/SubmitForm.svelte';
 	import ShareModal from '$components/index/ShareModal.svelte';
+
+	let emojis = [😀,😁,😂,🤣,😃,😄,😅,😆,😉,😊,😋,😎,😍,☺,🙂,🤗,🤩,😏]
 </script>
 
 <main>
@@ -50,11 +52,8 @@
 <footer class="container-fluid bg-dark text-light py-3">
 	<div class="row">
 		<div class="col text-center">
-			Made with 😕 by IG: <a
-				class="text-light"
-				href="https://www.instagram.com/ciril.tr/"
-				target="_blank">Ciril</a
-			>
+			Made with {emojis[Math.floor(Math.random() * emojis.length)]} by IG:
+			<a class="text-light" href="https://www.instagram.com/ciril.tr/" target="_blank">Ciril</a>
 			/ github:
 			<a class="text-light" href="https://github.com/letoast" target="_blank">letoast</a>
 		</div>
