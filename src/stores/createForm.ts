@@ -156,7 +156,7 @@ export const { form, errors, state, isValid, validateField, handleChange, handle
 				.required(),
 			referenca_prejemnika_part1: yup.string().oneOf(['SI00', 'SI99']).required(),
 			referenca_prejemnika_part2: yup.string().when('referenca_prejemnika_part1', {
-				is: 'SI00',
+				is: 'SI99',
 				then: yup.string().required('Za SI00 je potrebna referenca'),
 				otherwise: yup.string().nullable()
 			}),
