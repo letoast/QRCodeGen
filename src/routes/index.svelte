@@ -9,7 +9,26 @@
 	import SubmitForm from '$components/index/SubmitForm.svelte';
 	import ShareModal from '$components/index/ShareModal.svelte';
 
-	let emojis = [😀,😁,😂,🤣,😃,😄,😅,😆,😉,😊,😋,😎,😍,☺,🙂,🤗,🤩,😏]
+	let emojis = [
+		'😀',
+		'😁',
+		'😂',
+		'🤣',
+		'😃',
+		'😄',
+		'😅',
+		'😆',
+		'😉',
+		'😊',
+		'😋',
+		'😎',
+		'😍',
+		'☺',
+		'🙂',
+		'🤗',
+		'🤩',
+		'😏'
+	];
 </script>
 
 <main>
