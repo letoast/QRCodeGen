@@ -136,7 +136,7 @@ export const { form, errors, state, isValid, validateField, handleChange, handle
 			ulica_prejemnika: localStoragePresets?.ulica_prejemnika || '',
 			kraj_prejemnika: localStoragePresets?.kraj_prejemnika || '',
 			IBAN_prejemnika: localStoragePresets?.IBAN_prejemnika || '',
-			referenca_prejemnika_part1: 'SI00',
+			referenca_prejemnika_part1: 'SI99',
 			referenca_prejemnika_part2: '',
 			koda_namena: 'OTHR',
 			namen_placila: localStoragePresets?.namen_placila || 'NAKAŽI MI DENAR',
@@ -156,7 +156,7 @@ export const { form, errors, state, isValid, validateField, handleChange, handle
 				.required(),
 			referenca_prejemnika_part1: yup.string().oneOf(['SI00', 'SI99']).required(),
 			referenca_prejemnika_part2: yup.string().when('referenca_prejemnika_part1', {
-				is: 'SI99',
+				is: 'SI00',
 				then: yup.string().required('Za SI00 je potrebna referenca'),
 				otherwise: yup.string().nullable()
 			}),
