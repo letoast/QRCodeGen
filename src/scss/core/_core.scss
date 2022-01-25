@@ -37,7 +37,7 @@ input::-webkit-inner-spin-button {
 }
 
 /* Firefox */
-input[type='number'] {
+input[type="number"] {
 	-moz-appearance: textfield;
 }
 
@@ -95,4 +95,11 @@ input[type='number'] {
 	width: 100%;
 	height: auto;
 	object-fit: contain;
+}
+
+footer {
+	position: fixed;
+	right: 0;
+	bottom: 0;
+	left: 0;
 }
