@@ -33,6 +33,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@fontsource/jetbrains-mono": "^4.5.3",
     "@imask/svelte": "^6.2.2",
     "@types/validator": "^13.6.5",
     "bootstrap": "^5.1.3",
